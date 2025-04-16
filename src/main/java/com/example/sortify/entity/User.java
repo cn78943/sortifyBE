@@ -2,6 +2,7 @@ package com.example.sortify.entity;
 
 import jakarta.persistence.*;
 import java.time.LocalDateTime;
+import java.util.Objects;
 
 @Entity
 @Table(name = "users") // 실제 DB 테이블명과 일치시킴
@@ -18,6 +19,19 @@ public class User {
     private String passwordHash;
 
     private LocalDateTime createdAt;
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        User user = (User) o;
+        return Objects.equals(email, user.email); // 이메일로 비교
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(email); // 이메일을 기준으로 hashCode 생성
+    }
 
     // Getters & Setters
     public Long getId() { return id; }
