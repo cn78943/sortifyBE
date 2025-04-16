@@ -1,5 +1,6 @@
 package com.example.sortify.service;
 
+import com.example.sortify.config.CustomUserDetails;
 import com.example.sortify.entity.User;
 import com.example.sortify.repository.UserRepository;
 import org.springframework.security.core.userdetails.*;
@@ -21,10 +22,6 @@ public class CustomUserDetailsService implements UserDetailsService {
         User user = userRepository.findByEmail(email)
                 .orElseThrow(() -> new UsernameNotFoundException("이메일을 찾을 수 없습니다."));
 
-        return new org.springframework.security.core.userdetails.User(
-                user.getEmail(),
-                user.getPasswordHash(),
-                Collections.emptyList()
-        );
+        return new CustomUserDetails(user);
     }
 }

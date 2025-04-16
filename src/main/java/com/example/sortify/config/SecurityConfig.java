@@ -1,13 +1,16 @@
 package com.example.sortify.config;
 
+import com.example.sortify.config.JwtAuthenticationFilter; // ✅ 필터 import
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
 @Configuration
 public class SecurityConfig {
@@ -22,24 +25,23 @@ public class SecurityConfig {
         return new BCryptPasswordEncoder();
     }
 
-    // ✅ H2 콘솔 접근을 위한 보안 설정 추가
+    // ✅ JwtAuthenticationFilter를 security chain에 등록
     @Bean
-    public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
+    public SecurityFilterChain securityFilterChain(HttpSecurity http, JwtAuthenticationFilter jwtFilter) throws Exception {
         http
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/h2-console/**").permitAll()
                         .requestMatchers("/api/users/register").permitAll()
                         .requestMatchers("/api/auth/login").permitAll()
-                        .anyRequest().permitAll()
+                        .anyRequest().authenticated() // 그 외는 인증 필요
                 )
-                .csrf(csrf -> csrf
-                        .ignoringRequestMatchers("/h2-console/**", "/api/users/register", "/api/auth/login")
+                .csrf(csrf -> csrf.disable()
                 )
                 .headers(headers -> headers
-                        .frameOptions(frame -> frame.sameOrigin())  // ✅ 오류 해결 방식
-                );
+                        .frameOptions(frame -> frame.sameOrigin())
+                )
+                .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class); // ✅ 여기 추가
 
         return http.build();
     }
-
 }
