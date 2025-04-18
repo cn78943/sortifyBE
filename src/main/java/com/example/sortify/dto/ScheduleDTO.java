@@ -1,38 +1,20 @@
-package com.example.sortify.entity;
+package com.example.sortify.dto;
 
-import jakarta.persistence.*;
 import java.time.LocalDateTime;
-import java.util.ArrayList;
 import java.util.List;
 
-@Entity
-@Table(name = "schedules")
-public class Schedule {
+public class ScheduleDTO {
 
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-
     private String title;
-
     private LocalDateTime startTime;
-
     private LocalDateTime endTime;
+    private List<ToDoDTO> toDos;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "user_id")
-    private User user;
-
-    @OneToMany(mappedBy = "schedule", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<ToDo> toDos =  new ArrayList<>();
-
-    // 반복 관련 필드
-    private boolean recurring;
-
-    @ElementCollection
-    private List<String> recurringDays; // 문자열로 요일 저장
-
-    private LocalDateTime repeatUntil;
+    // 반복 설정 관련 필드 추가
+    private boolean recurring;                     // 반복 여부
+    private List<String> recurringDays;            // 반복 요일 (예: ["MONDAY", "WEDNESDAY"])
+    private LocalDateTime repeatUntil;             // 반복 종료일
 
     // Getters & Setters
     public Long getId() {
@@ -67,19 +49,11 @@ public class Schedule {
         this.endTime = endTime;
     }
 
-    public User getUser() {
-        return user;
-    }
-
-    public void setUser(User user) {
-        this.user = user;
-    }
-
-    public List<ToDo> getToDos() {
+    public List<ToDoDTO> getToDos() {
         return toDos;
     }
 
-    public void setToDos(List<ToDo> toDos) {
+    public void setToDos(List<ToDoDTO> toDos) {
         this.toDos = toDos;
     }
 

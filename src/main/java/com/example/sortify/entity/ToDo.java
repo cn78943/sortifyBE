@@ -21,19 +21,56 @@ public class ToDo {
     @JoinColumn(name = "user_id")
     private User user;
 
+    @ManyToOne
+    @JoinColumn(name = "schedule_id")
+    private Schedule schedule;
+
     // Getters & Setters
-    public Integer getId() { return id; }
-    public void setId(Integer id) { this.id = id; }
+    public Integer getId() {
+        return id;
+    }
 
-    public String getTask() { return task; }
-    public void setTask(String task) { this.task = task; }
+    public void setId(Integer id) {
+        this.id = id;
+    }
 
-    public boolean completed() { return status; }
-    public void setCompleted(boolean status) { this.status = status; }
+    public String getTask() {
+        return task;
+    }
 
-    public LocalDateTime getCreatedAt() { return createdAt; }
-    public void setCreatedAt(LocalDateTime createdAt) { this.createdAt = createdAt; }
+    public void setTask(String task) {
+        this.task = task;
+    }
 
-    public User getUser() { return user; }
-    public void setUser(User user) { this.user = user; }
+    public boolean completed() {
+        return status;
+    }
+
+    public void setCompleted(boolean status) {
+        this.status = status;
+    }
+
+    public LocalDateTime getCreatedAt() {
+        return createdAt;
+    }
+
+    public void setCreatedAt(LocalDateTime createdAt) {
+        this.createdAt = createdAt;
+    }
+
+    public User getUser() {
+        return user;
+    }
+
+    public void setUser(User user) {
+        this.user = user;
+    }
+
+    public Schedule getSchedule() {
+        return schedule;
+    }
+
+    public void setSchedule(Schedule schedule) {
+        this.schedule = schedule;
+    }
 }

@@ -5,6 +5,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
 import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
@@ -35,6 +36,7 @@ public class SecurityConfig {
                         .requestMatchers("/api/auth/login").permitAll()
                         .anyRequest().authenticated() // 그 외는 인증 필요
                 )
+                .cors(Customizer.withDefaults()) // CORS 설정 활성화
                 .csrf(csrf -> csrf.disable()
                 )
                 .headers(headers -> headers
