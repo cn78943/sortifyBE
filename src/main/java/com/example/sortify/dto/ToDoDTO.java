@@ -26,7 +26,7 @@ public class ToDoDTO {
         this.task = task;
     }
 
-    public boolean completed() {
+    public boolean isCompleted() {
         return completed;
     }
 

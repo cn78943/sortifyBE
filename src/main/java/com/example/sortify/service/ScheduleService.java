@@ -50,10 +50,23 @@ public class ScheduleService {
                     schedule.setRecurringDays(scheduleDTO.getRecurringDays());
                     schedule.setRepeatUntil(scheduleDTO.getRepeatUntil());
 
+                    // ✅ ToDo 처리
+                    if (scheduleDTO.getToDos() != null && !scheduleDTO.getToDos().isEmpty()) {
+                        List<ToDo> toDoList = scheduleDTO.getToDos().stream().map(toDoDTO -> {
+                            ToDo toDo = new ToDo();
+                            toDo.setTask(toDoDTO.getTask());
+                            toDo.setCompleted(toDoDTO.isCompleted());
+                            toDo.setCreatedAt(toDoDTO.getCreatedAt());
+                            toDo.setUser(user);
+                            toDo.setSchedule(schedule);
+                            return toDo;
+                        }).collect(Collectors.toList());
+                        schedule.setToDos(toDoList);
+                    }
+
                     Schedule saved = scheduleRepository.save(schedule);
                     createdSchedules.add(convertToDTO(saved));
                 }
-
                 current = current.plusDays(1);
             }
 
@@ -65,6 +78,20 @@ public class ScheduleService {
             schedule.setStartTime(scheduleDTO.getStartTime());
             schedule.setEndTime(scheduleDTO.getEndTime());
             schedule.setRecurring(false);
+
+            // ✅ ToDo 처리
+            if (scheduleDTO.getToDos() != null && !scheduleDTO.getToDos().isEmpty()) {
+                List<ToDo> toDoList = scheduleDTO.getToDos().stream().map(toDoDTO -> {
+                    ToDo toDo = new ToDo();
+                    toDo.setTask(toDoDTO.getTask());
+                    toDo.setCompleted(toDoDTO.isCompleted());
+                    toDo.setCreatedAt(toDoDTO.getCreatedAt());
+                    toDo.setUser(user);
+                    toDo.setSchedule(schedule);
+                    return toDo;
+                }).collect(Collectors.toList());
+                schedule.setToDos(toDoList);
+            }
 
             Schedule savedSchedule = scheduleRepository.save(schedule);
             return convertToDTO(savedSchedule);
@@ -89,7 +116,6 @@ public class ScheduleService {
         dto.setRecurringDays(schedule.getRecurringDays());
         dto.setRepeatUntil(schedule.getRepeatUntil());
 
-        // ToDo 목록도 함께 변환
         List<ToDoDTO> toDoDTOs = schedule.getToDos().stream()
                 .map(this::convertToDoToDTO)
                 .collect(Collectors.toList());
@@ -103,7 +129,7 @@ public class ScheduleService {
         ToDoDTO dto = new ToDoDTO();
         dto.setId(toDo.getId());
         dto.setTask(toDo.getTask());
-        dto.setCompleted(toDo.completed());
+        dto.setCompleted(toDo.isCompleted());
         dto.setCreatedAt(toDo.getCreatedAt());
         return dto;
     }

@@ -2,8 +2,10 @@ package com.example.sortify.controller;
 
 import com.example.sortify.config.CustomUserDetails;
 import com.example.sortify.dto.ToDoDTO;
+import com.example.sortify.entity.Schedule;
 import com.example.sortify.entity.ToDo;
 import com.example.sortify.entity.User;
+import com.example.sortify.repository.ScheduleRepository;
 import com.example.sortify.repository.ToDoRepository;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -19,9 +21,11 @@ import java.util.stream.Collectors;
 public class ToDoController {
 
     private final ToDoRepository toDoRepository;
+    private final ScheduleRepository scheduleRepository;
 
-    public ToDoController(ToDoRepository toDoRepository) {
+    public ToDoController(ToDoRepository toDoRepository, ScheduleRepository scheduleRepository) {
         this.toDoRepository = toDoRepository;
+        this.scheduleRepository = scheduleRepository;
     }
 
     // ✅ 로그인한 사용자의 할 일 목록 조회
@@ -34,7 +38,7 @@ public class ToDoController {
                     ToDoDTO dto = new ToDoDTO();
                     dto.setId(toDo.getId());
                     dto.setTask(toDo.getTask());
-                    dto.setCompleted(toDo.completed());
+                    dto.setCompleted(toDo.isCompleted());
                     dto.setCreatedAt(toDo.getCreatedAt());
                     return dto;
                 })
@@ -51,15 +55,21 @@ public class ToDoController {
         ToDo toDo = new ToDo();
         toDo.setUser(user);
         toDo.setTask(toDoDTO.getTask());
-        toDo.setCompleted(toDoDTO.completed());
+        toDo.setCompleted(toDoDTO.isCompleted());
         toDo.setCreatedAt(LocalDateTime.now());
+
+        if (toDoDTO.getScheduleId() != null) {
+            Schedule schedule = scheduleRepository.findById(toDoDTO.getScheduleId())
+                    .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Schedule not found"));
+            toDo.setSchedule(schedule);
+        }
 
         ToDo savedToDo = toDoRepository.save(toDo);
 
         ToDoDTO dto = new ToDoDTO();
         dto.setId(savedToDo.getId());
         dto.setTask(savedToDo.getTask());
-        dto.setCompleted(savedToDo.completed());
+        dto.setCompleted(savedToDo.isCompleted());
         dto.setCreatedAt(savedToDo.getCreatedAt());
 
         return dto;
@@ -81,14 +91,14 @@ public class ToDoController {
         }
 
         existingToDo.setTask(toDoDTO.getTask());
-        existingToDo.setCompleted(toDoDTO.completed());
+        existingToDo.setCompleted(toDoDTO.isCompleted());
 
         ToDo updatedToDo = toDoRepository.save(existingToDo);
 
         ToDoDTO dto = new ToDoDTO();
         dto.setId(updatedToDo.getId());
         dto.setTask(updatedToDo.getTask());
-        dto.setCompleted(updatedToDo.completed());
+        dto.setCompleted(updatedToDo.isCompleted());
         dto.setCreatedAt(updatedToDo.getCreatedAt());
 
         return dto;
@@ -110,4 +120,36 @@ public class ToDoController {
 
         toDoRepository.delete(toDo);
     }
+
+    // 완료 여부 반영 api
+    @PatchMapping("/{id}/completed")
+    public ToDoDTO updateCompletedStatus(@AuthenticationPrincipal CustomUserDetails userDetails,
+                                         @PathVariable Long id,
+                                         @RequestBody ToDoDTO toDoDTO) {
+
+        User user = userDetails.getUser();
+
+        ToDo existingToDo = toDoRepository.findById(id)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "ToDo not found"));
+
+        if (!existingToDo.getUser().equals(user)) {
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Unauthorized");
+        }
+
+        existingToDo.setCompleted(toDoDTO.isCompleted());
+        ToDo updatedToDo = toDoRepository.save(existingToDo);
+
+        ToDoDTO dto = new ToDoDTO();
+        dto.setId(updatedToDo.getId());
+        dto.setTask(updatedToDo.getTask());
+        dto.setCompleted(updatedToDo.isCompleted());
+        dto.setCreatedAt(updatedToDo.getCreatedAt());
+        if (updatedToDo.getSchedule() != null) {
+            dto.setScheduleId(updatedToDo.getSchedule().getId());
+        }
+
+        return dto;
+    }
+
 }
+

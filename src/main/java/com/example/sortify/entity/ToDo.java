@@ -42,7 +42,7 @@ public class ToDo {
         this.task = task;
     }
 
-    public boolean completed() {
+    public boolean isCompleted() {
         return status;
     }
 
